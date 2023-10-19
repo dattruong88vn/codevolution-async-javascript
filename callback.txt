@@ -1,0 +1,21 @@
+CALLBACK
+
+1.  Định nghĩa:
+
+    - Trong Javascript, các functions là những objects
+    - Giống như một object, một function có thể được truyền vào một function khác như một tham số.
+    - Một function cũng có thể được return về như giá trị từ một function khác.
+    - Function khi được truyền vào một function khác như là một tham số thì được gọi là callback function.
+    - Function khi chấp nhận một function khác như là một đối số hoặc return về một function thì được gọi là High Order Function
+
+2.  Tại sao cần callback function?
+    2.1. Synchronous Callback
+    - Một callback được thực thi ngay lập tức được gọi là synchronous callback.
+
+    2.2. Asynchronous Callback
+    - Một callback bất đồng bộ là một callback được tiếp tục thực thi sau khi một hoạt động bất đồng bộ hoàn thành.
+    - Các callback được sử dụng để trì hoãn thực thi cho đến khi một event xảy ra hoặc sau một khoảng thời gian nhất định.
+    - Data fetching luôn cần nhiều thời gian và chúng ta chỉ có thể chạy function sau khi data đã được fetch và ko phải chạy ngay lập tức
+
+3.  Vấn đề với callback pattern
+    - Callback hell: nếu bạn có nhiều callback function mà mỗi cấp đều phụ thuộc vào kết quả của cấp trước đó, các function lồng nhau trở nên phức tạp. Code của chúng ta sẽ khó đọc và maintain

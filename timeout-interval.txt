@@ -1,0 +1,66 @@
+ASYNCHRONOUS JAVASCRIPT
+
+1.  Javascript là gì?
+
+    - JS là một ngôn ngữ đồng bộ (synchronous), blocking và xử lý đơn luồng (single thread)
+    - Đồng bộ: code sẽ chạy từ trên xuống dưới, mỗi thời điểm chỉ chạy 1 dòng lệnh.
+    - Blocking: do cơ chế đồng bộ nên khi một dòng lệnh chưa thực thi xong, thì tất cả các dòng lệnh tiếp theo sẽ bị block. Không thể thực thi.
+    - Đơn luồng (single thread)
+      - Một thread đơn giản là một quá trình mà chương trình JS có thể sử dụng để chạy 1 tác vụ
+      - Mỗi thread chỉ có thể thực hiện 1 tác vụ tại 1 thời điểm
+      - JS chỉ có một thread được gọi là main thread để thực thi code.
+
+2.  Vấn đề xảy ra với synchronous, block, single thread trong Javascript:
+
+    - Khi thực hiện một tác vụ cần nhiều thời gian, ví dụ như fetch Data từ Database hoặc fetch Data từ server API.
+    - Quá trình này có thể kéo dài 1 giây cho đến vài phút, trong suốt quá trình này chúng ta ko thể thực thi các câu lệnh khác.
+    - Nếu Javascript chỉ đơn giản bỏ qua và tiếp tục thực thi câu lệnh tiếp theo thì chúng ta sẽ gặp lỗi do data không đúng như mong đợi
+    - Chúng ta cần có 1 cách để thực thi bất đồng bồ trong JS.
+    - Ví dụ:
+      const respone = fetchDataFromDB('endpoint);
+      displayDataFromDB(response);
+
+3.  Thực thi bất đồng bộ trong JS như thế nào?
+
+    - Chỉ sử dụng Javascript là không đủ.
+    - Chúng ta cần những mảnh ghép khác bên ngoài JS để giúp chúng ta viết code bất đồng bộ. Đó chính là Web browser.
+    - Web browser định nghĩa các function và APIs cho phép chúng ta đăng ký các function mà nó ko thực thi code đồng bộ, thay vào đó nó được gọi một cách bất đồng bộ khi có một sự kiện xảy ra.
+    - Ví dụ:
+      - setTimeOut, setInterval
+      - addEventListenner
+      - Callbacks, Promises, Async/Await
+    - Bạn có thể giúp code của bạn làm một số việc khác nhau trong cùng 1 thời điểm mà không làm blocking main thread.
+
+4.  Timeouts & Intervals
+    4.1. setTimeOut() - Sử dụng: function setTimeOut sẽ thực thi một đoạn code sau một khoảng thời gian xác định.
+
+        - Tham số:
+            + Tham số thứ nhất là function để thực thi
+            + Tham số thứ hai là thời gian đợi để thực thi, biểu diễn theo milliseconds.
+            + Các tham số tiếp theo (optinal), là các tham số muốn thêm vào function cần thực thi.
+
+        - Để clear timeout, bạn có thể sử dụng method clearTimeout(), truyền vào tham số chính là identifier (định danh) được trả về từ setTimeOut.
+
+    4.2. setInterval() - Sử dụng: sẽ thực thi một đoạn code lặp đi lặp lại theo một khoảng thời gian nhất định.
+
+        - Tham số tương tự setTimeOut.
+
+        - clearInterval tương tự clearTimeout
+
+    4.3. Lưu ý: - Timers và Intervals không phải là một thành phần của Javascript. Nó được thực hiện bởi Browser và 2 function setTimeOut và setInterval là tên những cái tên cơ bản được đưa vào như một chức năng của Javascript.
+
+        - Thời gian truyền vào là thời gian delay tối thiểu, không phải thời gian delay thực tế.
+
+        - Có thể sử dụng setTimeOut và đệ quy để đạt được kết quả tương tự như setInterval.
+            + Nếu sử dụng setTimeOut và đệ quy,
+                * Thời gian giữa các lần thực thi sẽ được đảm bảo
+                * Bạn có thể tính toán sự khác biệt trong các khoảng thời gian chờ trong mỗi lần lặp.
+
+            + Nếu sử dụng setInterval:
+                * Thời gian interval bao gồm thời gian thực thi code.
+                * Luôn luôn cố định thời gian chờ giữa 2 lần lặp.
+                * Ví dụ:
+                    ** delay: 100ms
+                    ** nếu code thực thi mất 40ms --> interval 60ms
+                    ** nếu code thực thi mất 50ms --> interval 50ms
+                    ** nếu code thực thi > 100ms --> thời gian chờ lâu hơn 100ms
