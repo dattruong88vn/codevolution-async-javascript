@@ -1,0 +1,80 @@
+PROMISE
+
+1.  Định nghĩa
+    -   Một Promise là một uỷ quyền cho một giá trị chưa biết tại thời điểm tạo ra promise. Nó cho phép bạn kết hợp xử lý các hành động bất đồng bộ đối với 2 trường hợp thành công hoặc thất bại.
+
+2.  Promise là gì?
+    -   Promise đơn giản chỉ là một Object trong Javascript.
+    -   Một promise luôn ở 1 trong 3 trạng thái:
+        +   Pending: trạng thái khi khởi tạo promise.
+        +   Fullfilled: trạng thái khi hành động thành công 
+        +   Rejected: tráng thái khi hành động thất bại
+
+3.  Tại sao cần Promise?
+    -   Promise giúp chúng ta thực hiện các tác vụ bất đồng bộ theo một cách đơn giản hơn nhiều so với sử dụng callback.
+    -   Callback hell có thể tránh được nếu sử dụng promise.
+
+4.  Làm việc với Promise như thế nào?
+    - Tạo 1 promise:
+        const promise = new Promise();
+
+    - Fullfill hoặc reject promise:
+        +   Constructor của Promise nhận vào 1 tham số là 1 callback function.
+        +   Callback function này mặc định sẽ nhận được 2 đối số: resolve và resolve, đây đều là những function.
+        +   Function resolve khi thực thi sẽ thay đổi trạng thái của promise từ pending sang fullfill
+        +   Function reject khi thực thi sẽ thay đổi trạng thái của promise từ pending sang rejected
+
+    - Thực thi các callback cho fullfill và reject:
+        +   Sau khi khởi tạo một một promise, thì promise có thể access vào 2 method là then() và catch().
+            promise.then().catch()
+        
+        +   Khi trạng thái của promise được chuyển sang fullfill thì callback function được truyền vào method then() lập tức được thực thi (gọi là onFullfill callback). Tương tự nếu trạng thái reject thì callback function được truyền vào catch() sẽ được thực thi (gọi là onReject callback).
+
+        +   Nếu muốn gửi thêm data khi resolve hoặc reject, chỉ cần truyền đối số vào function resolve và reject. Các đối số này sẽ tự động chuyển sang tham số của callback function trong then() và catch() tương ứng.
+
+5.  then() function:
+    -   Mặc định then() function sẽ nhận vào một đối số là onFullfill callback để thực thi khi trạng thái của promise chuyển sang fullfill.
+    -   Tuy nhiên, then() function cũng có thể nhận thêm một đối số thứ hai là onReject callback. Reject callback này hoạt động hoàn toàn giống với onReject callback được truyền vào catch() function.
+    - Tuy nhiên, khuyến khích sử dụng onReject callback truyền vào catch() function, bởi vì một số lý do sau:
+        +   onReject callback truyền vào then() thì chỉ hanlde lỗi của Promise. Nếu các callback function phát sinh lỗi, thì sẽ không thể hanlde.
+        +   Ngược lại, nếu onReject callback truyền vào catch() thì nếu onFullfill function phát sinh lỗi thì vẫn có thể catch lại và xử lý.
+
+6.  Chaining Promises:
+    -   Cả 2 method then() và catch() đều return về promises, do vậy bạn có thể nối lại với nhau.
+        + Ví dụ:
+            promise.then(onFullfill).catch(onReject);
+
+    -   Và bạn có thể nối các method then() bao nhiêu lần tuỳ ý, nó giúp tránh được callback hell.
+        + Ví dụ:
+            promise
+                .then(result1 => fetchData1())
+                .then(result2 => fetchData2())
+                .then(result3 => fetchData3())
+                .then(result4 => fetchData4())
+                .then(result => console.log(result))
+
+7.  Static methods: các method được gọi từ Class Promise, ko phải từ instance promise.
+    -   Promise.all():
+        + Thực hiện một loạt promise cùng lúc và trả về một promise duy nhất.
+        + Tham số nhận vào là một array các promise.
+        + Nếu tất cả các promise đều fullfill thì onFullfill callback sẽ nhận được một tham số là 1 array các resolve của các promise ban đầu.
+        + Nếu một trong các promise bị reject thì Promise.all() sẽ bị reject với message lỗi của promise bị reject đầu tiên.
+
+        + Ví dụ:
+            const promise1 = Promise.resolve(3);
+            const promise2 = 42;
+            const promise3 = new Promise((resolve, reject) => {
+                setTimeout(resolve, 100, 'foo');
+            })
+
+            Promise.all([promise1, promise2, promise3]).then((values) => {
+                console.log(values) // output [3, 42, 'foo']
+            })
+
+    -   Promise.allSettled():
+        + Tương tự Promise.all();
+        + Tuy nhiên, nó vẫn đợi đến khi tất cả các promise hoàn thành ngay cả khi có 1 promise bị reject mới chuyển trạng thái sang fullfilled hoặc rejected
+
+    -   Promise.race():
+        + Thực hiện một loạt promise cùng lúc và trả về promise ngay khi một trong các promise hoàn thành.
+        + Nếu promise nhanh nhất fullfill thì Promise.race() fullfill và ngược lại.
