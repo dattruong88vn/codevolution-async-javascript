@@ -1,0 +1,14 @@
+ASYNC AWAIT
+
+1.  Định nghĩa
+    -   Được giới thiệu vào năm 2017 (ES8)
+    -   Keyword async/await cho phép chúng ta viết code xử lý bất đồng bộ nhưng có cấu trúc code theo kiểu đồng bộ.
+
+2.  Async keyword:
+    -   Từ khoá async được sử dụng để khai báo async function.
+    -   Async function là những function mà nó là những instance của AsyncFunction Constructor
+    -   Không giống như function bình thường, async function luôn luôn trả về một promise.
+
+3.  Await keyword:
+    -   Từ khoá await có thể đặt trước bất kỳ một async promise để tạm dừng đoạn code cho đến khi promise được resolve và trả về kết quả.
+    -   Từ khoá await chỉ có thể hợp lệ bên trong một async function.
