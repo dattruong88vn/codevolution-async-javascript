@@ -1,0 +1,107 @@
+EVENT LOOP
+
+1.  Javascript Runtime enviroment: 
+
+    - Bao gồm tất cả các thành phần để có thể chạy code Javascript trên browser.
+    - Thành phần:
+        + Javascript Engine:
+        + Browser Web APIs
+        + Callback Queue (hay còn gọi là Task Queue hay Message Queue)
+        + Event Loop
+
+
+    1.1.  Javascript Engine
+        - Thành phần:
+            + Memory Heap: nơi cấp phát bộ nhớ để lưu trữ biến và function
+            + Callstack:
+                * Khi function được thực thi, nó sẽ được chuyển vào callstact.
+                * Ngược lại, khi function thực thi xong nó sẽ được remove ra khỏi callstack.
+                * Hoạt động theo nguyên tắc LIFO, dựa theo stack data structure.
+        - Một ví dụ đơn giản về Javascript Engine đó chính là Chrome V8 engine.
+
+    1.2.  Browser Web APIs
+        - Các thành phần:
+            + setTimeout
+            + Promise
+            + DOM
+            + XHR request
+        - Lưu ý những APIs này không được tích hợp trong Javascript. Đây là những feature được cung cấp bởi Browser và Javascript đơn giản là có thể sử dụng chúng.
+
+    1.3.  Callback Queue
+        - Đây là cấu trúc dữ liệu FIFO
+
+    1.4.  Event Loop
+        - Chức năng: chỉ có một chức năng duy nhất là kiểm tra nếu Callstack trống thì sẽ đẩy các item từ Callback Queue vào Callstack.
+
+
+2.  Cách hoạt động của setTimeout trong Runtime:
+
+    -   Đầu tiên function setTimeout được đưa vào callstack.
+    -   Callstack nhận biết setTimeout là 1 webApi nên sẽ push callback sang WebApis đồng thời remove function setTimeout ra khỏi callstack
+    -   Tiếp tục thực thi các câu lệnh đồng bộ khác cho đến khi callstack trống.
+    -   Lúc này, WebApis đợi hết thời gian time out và chuẩn bị để thực thi callback function.
+    -   Muốn thực thi callback function thì phải đưa nó vào callstack, tuy nhiên WebApis không thể push trực tiếp sang callstack.
+    -   WebApis sẽ push callback function sang Callback Queue. Callback function lúc này đợi để được thực thi.
+    -   Việc quyết định khi nào push callback từ Callback Queue vào Callstack là do Event Loop quyết định: khi và chỉ khi callstack trống.
+
+3.  Cách hoạt động của Promise trong Runtime:
+    - Ngữ cảnh: 
+        + Sử dụng fetch function để call api, return về một Promise lưu vào constant promise.
+        + promise khi success sẽ thực hiện callback là in data nhận được từ api ra màn hình.
+
+    - Ví dụ:
+        line 1:     console.log('First');
+
+        line 2:     const promise = fetch("endpoint");
+        line 3:     promise.then(callback);
+
+        line 4:     console.log('Second');
+
+    - Cấu trúc dữ liệu promise trong HEAP:
+        promise = {
+            value: ___,
+            onFullfillment: []
+            onRejected: []
+        }
+
+    - Các bước thực hiện:
+        + Thực thi dòng 1:
+            * function log('First') được push vào callstack, thực thi in ra màn hình.
+            * function log('First') được remove ra khỏi callstack.
+
+        + Callstack trống.
+            * Thực thi dòng 2: fetch function được push vào callstack, callstack push fetch function sang webapis và remove nó ra khỏi Callstack
+            * WebApis thực thi fetch function nhận được một Promise, và memory heap sẽ lưu Promise này và một constant có tên promise. 
+            * constant promise được lưu trong heap bao gồm value và 2 hành động xử lý onFullfillment và onRejected. Lúc này cả 2 đều trống.
+            * Đồng thời quá trình fetch data bắt đầu được thực hiện.
+
+        + Callstack trống
+        + Thực thi dòng 3:  
+            * function promise.then() được push vào callstack, cùng với 1 callback là tham số của then().
+            * callback function này chỉ có 1 chức năng là thực hiện khi promise chuyển sang trạng thái fullfill.
+            * callback được lưu vào hành động onFullfillment trong constant promise trong memory heap.
+            * promise.then() được remore ra khỏi callstack.
+
+        + Callstack trống
+        + Thực thi dòng 4:
+            * function log('Second') được push vào callstack, thực thi in ra màn hình.
+            * function log('Second') được remove ra khỏi callstack.
+
+        + Callstack trống
+        + Lúc này fetch function trong WebApis thực thi xong, nhận được data từ endpoint.
+            * fetch function sẽ set data nhận được vào biến value của constant promise trong memory heap.
+            * WebApis remove fetch function
+            * promise nhận data thành công, chuyển trạng thái thành fullfill. Lúc này javascript sẽ tự động thực thi tất cả các function bên trong onFullfillment.
+            * Javascript không thể trực tiếp push callback function vào callstack để thực thi, thay vào đó nó sẽ push callback function cùng với promise value vào microtask queue.
+        
+        + Event Loop thực hiện chức năng của nó:
+            * Nhận thấy callstack trống và microtask queue có item.
+            * Push callback + value từ microtask queue vào callstack.
+            * Callstack thực thi callback function.
+            * Sau đó remove callback ra khỏi
+
+4.  Cách hoạt động của setTimeout và Promise cùng lúc trong Runtime:
+    - Microtask Queue có độ ưu tiên cao hơn Callback Queue
+    - Nên trường hợp callstack trống và cả Microtask Queue và Callback Queue đều có item sẵn sàng thì Event Loop sẽ ưu tiên item trong Microtask Queue.
+        
+        
